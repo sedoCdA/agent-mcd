@@ -1,20 +1,16 @@
 from stt import listen_and_transcribe
-from tts import speak, configure_voice
+from tts import speak
 
 
 STOP_PHRASES = ["stop", "wait", "hold on", "pause", "let me", "actually"]
 
 
 def check_for_interrupt(text: str) -> bool:
-    """
-    Checks if the user wants to pause or correct themselves.
-    """
     text_lower = text.lower()
     return any(phrase in text_lower for phrase in STOP_PHRASES)
 
 
 def run_voice_loop():
-    configure_voice()
     speak("Hello, welcome to McDonald's crew support. I am here to help you. Please describe your issue.")
 
     while True:
@@ -32,7 +28,6 @@ def run_voice_loop():
             speak("Thank you for calling. Goodbye.")
             break
 
-        # Placeholder echo response before real agent logic
         speak(f"I heard you say: {user_input}. Let me process that.")
 
 

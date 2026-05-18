@@ -1,37 +1,39 @@
-import pyttsx3
+import asyncio
+import edge_tts
+import tempfile
+import os
+import sounddevice as sd
+import soundfile as sf
 
 
-engine = pyttsx3.init()
+VOICE = "en-US-AriaNeural"
+RATE = "+0%"
+VOLUME = "+0%"
 
 
-def configure_voice(rate: int = 165, volume: float = 1.0):
-    """
-    Configure speech rate and volume.
-    rate: words per minute (default 165, calm and clear)
-    volume: 0.0 to 1.0
-    """
-    engine.setProperty("rate", rate)
-    engine.setProperty("volume", volume)
+async def _speak_async(text: str):
+    communicate = edge_tts.Communicate(text, VOICE, rate=RATE, volume=VOLUME)
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as tmp:
+        tmp_path = tmp.name
 
-    voices = engine.getProperty("voices")
-    for voice in voices:
-        if "english" in voice.name.lower():
-            engine.setProperty("voice", voice.id)
-            break
+    await communicate.save(tmp_path)
+
+    data, samplerate = sf.read(tmp_path)
+    sd.play(data, samplerate)
+    sd.wait()
+    os.unlink(tmp_path)
 
 
 def speak(text: str):
     """
-    Converts text to speech and plays it immediately.
-    Blocks until speech is complete.
+    Converts text to speech using Microsoft Edge neural TTS.
+    Plays audio through speakers and prints to console.
     """
     print(f"Agent: {text}")
-    engine.say(text)
-    engine.runAndWait()
+    asyncio.run(_speak_async(text))
 
 
 if __name__ == "__main__":
-    configure_voice()
     speak("Hello, this is the McDonald's crew support assistant. How can I help you today?")
     speak("I understand your issue. Let me look into that for you.")
     speak("Your problem has been escalated to a human agent. Please hold.")
