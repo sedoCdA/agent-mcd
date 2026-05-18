@@ -3,13 +3,7 @@ from tts import speak
 from agent import get_response
 
 
-STOP_PHRASES = ["stop", "wait", "hold on", "pause", "let me", "actually"]
 EXIT_PHRASES = ["exit", "quit", "goodbye", "bye", "thank you bye"]
-
-
-def check_for_interrupt(text: str) -> bool:
-    text_lower = text.lower()
-    return any(phrase in text_lower for phrase in STOP_PHRASES)
 
 
 def run_voice_loop():
@@ -20,12 +14,8 @@ def run_voice_loop():
     while True:
         user_input = listen_and_transcribe(duration=6)
 
-        if not user_input:
-            speak("I did not catch that. Could you please repeat your issue?")
-            continue
-
-        if check_for_interrupt(user_input):
-            speak("Of course, take your time. I am listening.")
+        if not user_input or len(user_input.strip()) < 3:
+            speak("I did not catch that. Could you please repeat?")
             continue
 
         if any(phrase in user_input.lower() for phrase in EXIT_PHRASES):
@@ -33,12 +23,13 @@ def run_voice_loop():
             break
 
         conversation_history.append({"role": "user", "content": user_input})
-
         response = get_response(conversation_history)
-
         conversation_history.append({"role": "assistant", "content": response})
 
-        speak(response)
+        interrupted = speak(response)
+
+        if interrupted:
+            speak("Go ahead, I am listening.")
 
 
 if __name__ == "__main__":
