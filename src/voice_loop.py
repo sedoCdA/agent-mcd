@@ -1,8 +1,10 @@
 from stt import listen_and_transcribe
 from tts import speak
+from agent import get_response
 
 
 STOP_PHRASES = ["stop", "wait", "hold on", "pause", "let me", "actually"]
+EXIT_PHRASES = ["exit", "quit", "goodbye", "bye", "thank you bye"]
 
 
 def check_for_interrupt(text: str) -> bool:
@@ -11,24 +13,32 @@ def check_for_interrupt(text: str) -> bool:
 
 
 def run_voice_loop():
-    speak("Hello, welcome to McDonald's crew support. I am here to help you. Please describe your issue.")
+    conversation_history = []
+
+    speak("Hello, thank you for calling McDonald's crew support. My name is Max. How can I help you today?")
 
     while True:
         user_input = listen_and_transcribe(duration=6)
 
         if not user_input:
-            speak("I did not catch that. Could you please repeat?")
+            speak("I did not catch that. Could you please repeat your issue?")
             continue
 
         if check_for_interrupt(user_input):
             speak("Of course, take your time. I am listening.")
             continue
 
-        if any(word in user_input.lower() for word in ["exit", "quit", "goodbye", "bye"]):
-            speak("Thank you for calling. Goodbye.")
+        if any(phrase in user_input.lower() for phrase in EXIT_PHRASES):
+            speak("Thank you for calling McDonald's crew support. Have a good day.")
             break
 
-        speak(f"I heard you say: {user_input}. Let me process that.")
+        conversation_history.append({"role": "user", "content": user_input})
+
+        response = get_response(conversation_history)
+
+        conversation_history.append({"role": "assistant", "content": response})
+
+        speak(response)
 
 
 if __name__ == "__main__":
