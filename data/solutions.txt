@@ -1,0 +1,79 @@
+ISSUE: Screen not showing updated menu prices
+PRIORITY: P2
+SOLUTION: Go to the manager terminal and open the POS admin panel. Navigate to Menu Management and click Sync Now. Wait 2 minutes for the sync to complete. If the issue persists, restart the display unit by holding the power button for 10 seconds. If still unresolved after restart, check the network connection of the display unit.
+
+ISSUE: Inventory not updating
+PRIORITY: P2
+SOLUTION: Open the inventory management portal on the back office system. Click on Manual Sync under the Tools menu. If the sync fails, check that the back office PC is connected to the internet. Restart the inventory service by going to Services in Task Manager, finding McDInventoryService, and clicking Restart. Allow 5 minutes for full sync.
+
+ISSUE: Store system completely down
+PRIORITY: P1
+SOLUTION: First check if the main server under the counter is powered on. Verify all network cables are connected. Restart the main server by pressing the reset button. If the system does not come back within 5 minutes, switch to offline mode using the laminated offline procedure card kept near the register. Escalate immediately to the regional IT team.
+
+ISSUE: Products not showing on customer screens
+PRIORITY: P2
+SOLUTION: Check if the digital menu board controller is powered on. Restart the controller using the power button at the back of the unit. If products still do not appear, log into the content management system and click Republish Content. Allow 3 minutes for content to push to screens.
+
+ISSUE: POS terminal not responding
+PRIORITY: P1
+SOLUTION: Force close the POS application using Ctrl Alt Delete and restarting the process from Task Manager. If the terminal is completely frozen, hold the power button for 10 seconds to force restart. Do not turn off the main server when restarting a terminal. If multiple terminals are down simultaneously, escalate as P1 immediately.
+
+ISSUE: Receipt printer not printing
+PRIORITY: P3
+SOLUTION: Check if the printer has paper loaded correctly. Verify the USB or network cable connecting the printer to the terminal is secure. Restart the printer using its power button. If the printer shows an error light, open the printer cover and check for paper jams. Reprint the last receipt from the POS terminal to verify the fix.
+
+ISSUE: Web content not loading on crew portal
+PRIORITY: P3
+SOLUTION: Clear the browser cache by pressing Ctrl Shift Delete and clearing all cached data. Restart the browser. If the portal still does not load, check internet connectivity by opening any other website. If internet is down, restart the router by unplugging it for 30 seconds and plugging it back in. Contact ISP if internet does not restore.
+
+ISSUE: Login credentials not working
+PRIORITY: P2
+SOLUTION: Verify the crew member is entering the correct employee ID. Ensure Caps Lock is not on. If the password has been forgotten, the store manager can reset it from the admin panel under User Management. If the admin panel itself is inaccessible, escalate to the regional IT helpdesk with the employee ID.
+
+ISSUE: Temperature monitoring system not updating
+PRIORITY: P3
+SOLUTION: Check the temperature sensor device is powered and the indicator light is green. Restart the monitoring application from the back office PC. If readings are still not updating after 10 minutes, check the sensor cable connections. Log a maintenance ticket if the sensor hardware appears faulty.
+
+ISSUE: Kiosk touchscreen not responding to touches
+PRIORITY: P2
+SOLUTION: Clean the screen surface with a dry cloth as grease or moisture can block touch input. Restart the kiosk by accessing the back panel power switch. If the issue persists after restart, check if the touchscreen driver shows any errors in the device manager on the back office PC. Escalate if hardware fault is suspected.
+
+ISSUE: No orders appearing in kitchen display system
+PRIORITY: P1
+SOLUTION: Verify the kitchen display controller is powered on and connected to the network. Restart the Kitchen Display System application from the back office PC. Check whether orders are appearing on POS terminals but not routing to the kitchen. Restart the order routing service from Services in Task Manager. If no orders appear after 5 minutes, switch kitchen operations to printed receipts and escalate to IT support immediately.
+
+ISSUE: Employee not showing on scheduling portal
+PRIORITY: P2
+SOLUTION: Open the employee management portal and verify the employee profile is active. Run a manual sync from the HR integration settings. Ensure the employee has been assigned to the correct store location. If the employee still does not appear, clear the portal cache and log out/in again. Escalate to HR systems support if sync fails repeatedly.
+
+ISSUE: Main server powered off unexpectedly
+PRIORITY: P1
+SOLUTION: Check the server power cable and UPS connection under the counter. Verify the UPS battery alarm is not active. Press the server power button once and allow 5 minutes for startup. Confirm network switch lights are active after boot. If the server fails to power on or shuts down again, immediately escalate to regional infrastructure support.
+
+ISSUE: Orders stuck in pending state
+PRIORITY: P1
+SOLUTION: Check the POS order processing service on the main server. Restart the OrderQueueService from Services in Task Manager. Verify database connectivity from the admin diagnostics panel. If pending orders continue increasing after restart, temporarily switch affected terminals to offline order mode and escalate to backend support.
+
+ISSUE: Payment terminal not processing card transactions
+PRIORITY: P1
+SOLUTION: Verify the payment terminal network cable or WiFi connection is active. Restart the payment device by holding the power button for 10 seconds. Run a test transaction for a small amount. If transactions continue failing, restart the payment gateway service from the POS admin panel. Contact the payment provider if authorization errors persist.
+
+ISSUE: Drive thru order headset not working
+PRIORITY: P2
+SOLUTION: Check the headset battery level and ensure the charging dock is connected. Restart the drive thru communication base station. Verify all crew headsets are paired correctly. If only one headset is affected, replace the battery pack or swap devices. Escalate for hardware replacement if communication remains unavailable.
+
+ISSUE: Customer kiosks showing blank screen
+PRIORITY: P1
+SOLUTION: Verify the kiosk PC and display power indicators are on. Restart the kiosk application from the maintenance panel. Check HDMI and power cable connections behind the kiosk. If all kiosks are blank simultaneously, verify the content server is online. Escalate immediately if kiosks fail to recover after restart.
+
+ISSUE: Online delivery orders not syncing into POS
+PRIORITY: P1
+SOLUTION: Open the delivery integration dashboard and verify all third-party delivery channels are connected. Restart the DeliverySyncService from the back office PC. Run a manual sync test from the integrations page. If orders still do not import, temporarily manage delivery orders manually using delivery partner tablets and escalate to integration support.
+
+ISSUE: Crew portal showing access denied
+PRIORITY: P2
+SOLUTION: Verify the employee role permissions in the admin panel under Access Management. Ensure the crew member account is active and assigned to the correct store. Clear browser cookies and cache before retrying login. If multiple employees receive the same error, restart the authentication service on the back office server.
+
+ISSUE: Store network completely unavailable
+PRIORITY: P1
+SOLUTION: Check if the main router and network switches have power and active status lights. Restart the router by unplugging power for 30 seconds and reconnecting it. Verify the ISP modem shows internet connectivity. If no devices regain connection after restart, activate offline POS procedures immediately and escalate to the ISP and regional IT support.

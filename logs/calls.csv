@@ -1,0 +1,5 @@
+call_id,timestamp,caller_name,store_id,issue_description,priority,resolution_status,escalated_to_human,attempts,duration_seconds
+CALL-20260518233645,2026-05-18 23:36:45,John,MCD-0042,Inventory not updating on back office system,P2,Resolved,False,2,134.5
+CALL-20260518233645,2026-05-18 23:36:45,Sarah,MCD-0087,Store system completely down,P1,Unresolved,True,3,210.0
+CALL-20260518234142,2026-05-18 23:41:42,Aditya,Okay.,"All store screens are completely black and not working, affecting the ability to process transactions.",P1,Unresolved,True,3,105.2
+CALL-20260518234408,2026-05-18 23:44:08,Aditya,321 is my store id,User's screens are showing a red MPA error.,P1,Unresolved,True,3,93.84

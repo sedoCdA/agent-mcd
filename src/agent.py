@@ -48,6 +48,47 @@ def get_response(conversation_history: list) -> str:
 
     return response.choices[0].message.content.strip()
 
+def extract_call_metadata(conversation_history: list) -> dict:
+    """
+    Asks the LLM to extract structured metadata from the conversation.
+    Returns priority, resolution status, and a short issue description.
+    """
+    transcript = "\n".join(
+        [f"{msg['role'].upper()}: {msg['content']}" for msg in conversation_history]
+    )
+
+    prompt = f"""
+Based on this support call transcript, extract the following in JSON format only, no explanation:
+{{
+  "priority": "P1 or P2 or P3 or P4",
+  "resolution_status": "Resolved or Unresolved",
+  "issue_description": "one sentence summary of the issue"
+}}
+
+Transcript:
+{transcript}
+"""
+
+    response = client.chat.completions.create(
+        model=MODEL,
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.0,
+        max_tokens=150
+    )
+
+    raw = response.choices[0].message.content.strip()
+
+    import json
+    try:
+        clean = raw.replace("```json", "").replace("```", "").strip()
+        return json.loads(clean)
+    except Exception:
+        return {
+            "priority": "P3",
+            "resolution_status": "Unresolved",
+            "issue_description": "Issue details unavailable"
+        }
+
 
 if __name__ == "__main__":
     history = []
