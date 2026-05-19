@@ -3,3 +3,5 @@ CALL-20260518233645,2026-05-18 23:36:45,John,MCD-0042,Inventory not updating on 
 CALL-20260518233645,2026-05-18 23:36:45,Sarah,MCD-0087,Store system completely down,P1,Unresolved,True,3,210.0
 CALL-20260518234142,2026-05-18 23:41:42,Aditya,Okay.,"All store screens are completely black and not working, affecting the ability to process transactions.",P1,Unresolved,True,3,105.2
 CALL-20260518234408,2026-05-18 23:44:08,Aditya,321 is my store id,User's screens are showing a red MPA error.,P1,Unresolved,True,3,93.84
+CALL-20260519105423,2026-05-19 10:54:23,Unknown,"If you have your own model, you want to deploy that and you want to learn about it.",User is having an unspecified technical issue at their McDonald's outlet.,P2,Unresolved,True,3,83.64
+CALL-20260519182503,2026-05-19 18:25:03,Test User,MCD-TEST,Test issue for unit test,P3,Resolved,False,1,45.0
