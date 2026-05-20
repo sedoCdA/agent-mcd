@@ -19,9 +19,13 @@ RESOLUTION_INDICATORS = [
 
 PRIORITY_ORDER = {"P1": 1, "P2": 2, "P3": 3, "P4": 4}
 
-EXIT_PHRASES = ["exit", "quit", "goodbye", "bye", "thank you bye",
+# FIX #5: Added "thank you" and "thanks" as standalone exit phrases
+EXIT_PHRASES = [
+    "exit", "quit", "goodbye", "bye", "thank you bye",
     "don't want any help", "do not want any help",
-    "no help", "not interested", "nothing", "that's all", "that's it"]
+    "no help", "not interested", "nothing", "that's all", "that's it",
+    "thank you", "thanks"
+]
 
 FAILURE_INDICATORS = [
     "not working", "still", "didn't work", "does not work",
@@ -52,11 +56,45 @@ def is_failure_response(text: str) -> bool:
 def is_solution_response(text: str) -> bool:
     return any(phrase in text.lower() for phrase in SOLUTION_INDICATORS)
 
-def is_out_of_scope(text: str) -> bool:
+
+# FIX #1: conversation_history parameter now actually used in the call site (run_voice_loop)
+def is_out_of_scope(text: str, conversation_history=None) -> bool:
     """
     Detects if the user message has nothing to do with IT or store operations.
-    Uses LLM for accuracy.
+    Uses LLM for accuracy, but avoids false positives during follow-up troubleshooting.
     """
+    lowered = text.lower().strip()
+
+    # Very short acknowledgements or troubleshooting follow-ups should not be treated as out of scope
+    followup_indicators = [
+        "yes", "yeah", "yep", "no", "nope", "same", "still same",
+        "already tried", "still", "not working", "same issue",
+        "same problem", "i checked", "we checked", "they checked", "cache",
+        "connection is stable", "password is correct", "tried that as well",
+    ]
+
+    if any(word in lowered for word in followup_indicators):
+        return False
+
+    # If the conversation already contains IT/operations context, keep it in scope
+    if conversation_history:
+        recent_context = " ".join(
+            m["content"].lower()
+            for m in conversation_history[-6:]
+            if m["role"] in ["user", "assistant"]
+        )
+
+        context_keywords = [
+            "login", "website", "browser", "cache", "cookie", "password",
+            "account", "portal", "network", "internet", "wifi", "system",
+            "crew", "store", "app", "server", "pos", "printer", "router",
+            "screen", "display", "restart", "reboot", "boot", "power",
+            "cable", "connection", "safe mode", "diagnostic"
+        ]
+
+        if any(keyword in recent_context for keyword in context_keywords):
+            return False
+
     response = client.chat.completions.create(
         model=MODEL,
         messages=[
@@ -144,12 +182,12 @@ def get_caller_info() -> tuple:
 
     if not name:
         speak("Sorry, could you repeat your name?")
-        time.sleep(0.8)
+        time.sleep(1.5)
         name_raw = listen_and_transcribe(duration=4)
         name = extract_name_via_llm(name_raw) or "Unknown"
 
     speak(f"Got it, {name}. Just to confirm, am I saying that right?")
-    time.sleep(0.8)
+    time.sleep(1.5)
     confirmation_raw = listen_and_transcribe(duration=4)
 
     if confirmation_raw and any(
@@ -157,35 +195,40 @@ def get_caller_info() -> tuple:
         for word in ["no", "wrong", "not", "incorrect", "nope"]
     ):
         speak("My apologies. Could you spell your name?")
-        time.sleep(0.8)
+        time.sleep(1.5)
         spelled_raw = listen_and_transcribe(duration=6)
         corrected = extract_name_via_llm(spelled_raw)
         if corrected:
             name = corrected
 
     speak(f"Thank you {name}. And your store ID?")
-    time.sleep(0.8)
+    time.sleep(1.5)
     store_raw = listen_and_transcribe(duration=4)
     store_id = extract_store_id_via_llm(store_raw)
 
     if not store_id:
         speak("Could you repeat just the store number?")
-        time.sleep(0.8)
+        time.sleep(1.5)
         store_raw = listen_and_transcribe(duration=4)
         store_id = extract_store_id_via_llm(store_raw) or "Unknown"
 
     speak(f"Store {store_id}, confirmed?")
-    time.sleep(0.8)
+    time.sleep(1.5)
     confirmation_raw = listen_and_transcribe(duration=4)
 
     if confirmation_raw and any(
         word in confirmation_raw.lower()
         for word in ["no", "wrong", "not", "incorrect", "nope"]
     ):
-        speak("Please repeat your store number.")
-        time.sleep(0.8)
-        store_raw = listen_and_transcribe(duration=4)
-        corrected = extract_store_id_via_llm(store_raw)
+        # FIX #2: First try to extract store ID from the confirmation response itself
+        # (e.g. user says "No, store number is 721" — the answer is already in that sentence)
+        corrected = extract_store_id_via_llm(confirmation_raw)
+        if not corrected:
+            # Only re-listen if confirmation_raw didn't contain a usable store ID
+            speak("Please repeat your store number.")
+            time.sleep(1.5)
+            store_raw = listen_and_transcribe(duration=4)
+            corrected = extract_store_id_via_llm(store_raw)
         if corrected:
             store_id = corrected
 
@@ -228,7 +271,7 @@ def run_voice_loop():
     start_time = time.time()
 
     speak("Hello, thank you for calling McDonald's crew support. My name is Max. Who am I speaking with today?")
-    time.sleep(1.5)
+    time.sleep(2.5)
 
     caller_name, store_id = get_caller_info()
 
@@ -238,7 +281,7 @@ def run_voice_loop():
     })
 
     speak(f"Perfect. Store {store_id}. Please describe your issue.")
-    time.sleep(1.5)
+    time.sleep(2.0)
 
     while True:
         user_input = listen_and_transcribe(duration=6)
@@ -247,6 +290,7 @@ def run_voice_loop():
             speak("I did not catch that. Please repeat.")
             continue
 
+        # EXIT PHRASE CHECK
         if any(phrase in user_input.lower() for phrase in EXIT_PHRASES):
             if escalation_manager:
                 from_agent = any(
@@ -267,22 +311,39 @@ def run_voice_loop():
             speak("Thank you for calling. Have a good day.")
             break
 
-        if is_out_of_scope(user_input):
+        # FIX #1: Pass conversation_history so the context guard inside is_out_of_scope() runs
+        if is_out_of_scope(user_input, conversation_history):
             out_of_scope_count += 1
             if out_of_scope_count >= OUT_OF_SCOPE_LIMIT:
-                speak("I can only assist with McDonald's IT and operations issues. I will close this call now. Please call back if you have a system related issue. Have a good day.")
+                speak(
+                    "I can only assist with McDonald's IT and operations issues. "
+                    "I will close this call now. Please call back if you have a system "
+                    "related issue. Have a good day."
+                )
+                # FIX #3: Log the call even when terminated due to out-of-scope limit
+                if escalation_manager:
+                    finalize_and_log(
+                        caller_name, store_id, conversation_history,
+                        escalation_manager, "Unresolved",
+                        failed_attempts, start_time
+                    )
                 break
-            speak("I can only help with McDonald's store IT and operations issues. Do you have a system related problem I can assist with?")
+            speak(
+                "I can only help with McDonald's store IT and operations issues. "
+                "Do you have a system related problem I can assist with?"
+            )
             continue
 
+        # Valid in-scope message — reset out-of-scope counter
         out_of_scope_count = 0
 
         conversation_history.append({"role": "user", "content": user_input})
 
+        # PRIORITY DETECTION
         if escalation_manager is None:
             priority = detect_priority_from_rag(user_input)
             escalation_manager = EscalationManager(priority)
-            speak(f"This is a {priority} priority issue. I will help you resolve it within {escalation_manager.sla_label}.")
+            speak(f"No worries, {caller_name}. I will help you resolve this as soon as possible.")
         elif escalation_manager.priority != "P1" and len(conversation_history) <= 4:
             new_priority = detect_priority_from_rag(user_input)
             if should_upgrade_priority(escalation_manager.priority, new_priority):
@@ -292,13 +353,18 @@ def run_voice_loop():
                 escalation_manager.sla_label = SLA_LABELS[new_priority]
                 speak(f"Upgrading this to {new_priority} priority based on what you described.")
 
+        # FIX #4: failed_attempts increments correctly because is_out_of_scope() no longer
+        # interrupts via `continue` on valid troubleshooting follow-ups — this line is
+        # now always reached for in-scope messages after a solution attempt
         if last_was_solution and is_failure_response(user_input):
             failed_attempts += 1
 
+        # SLA WARNING
         sla_warning = escalation_manager.get_sla_warning_message()
         if sla_warning:
             speak(sla_warning)
 
+        # ESCALATION CHECK
         should_escalate, reason = escalation_manager.should_escalate(
             failed_attempts, max_attempts=3
         )
@@ -313,6 +379,7 @@ def run_voice_loop():
             )
             break
 
+        # GET AND SPEAK AGENT RESPONSE
         response = get_response(conversation_history)
         conversation_history.append({"role": "assistant", "content": response})
 
@@ -322,6 +389,7 @@ def run_voice_loop():
         if interrupted:
             speak("Go ahead, I am listening.")
 
+        # RESOLUTION CHECK
         if is_resolved_by_agent(response):
             finalize_and_log(
                 caller_name, store_id, conversation_history,
