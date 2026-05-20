@@ -19,7 +19,9 @@ RESOLUTION_INDICATORS = [
 
 PRIORITY_ORDER = {"P1": 1, "P2": 2, "P3": 3, "P4": 4}
 
-EXIT_PHRASES = ["exit", "quit", "goodbye", "bye", "thank you bye"]
+EXIT_PHRASES = ["exit", "quit", "goodbye", "bye", "thank you bye",
+    "don't want any help", "do not want any help",
+    "no help", "not interested", "nothing", "that's all", "that's it"]
 
 FAILURE_INDICATORS = [
     "not working", "still", "didn't work", "does not work",
@@ -31,6 +33,8 @@ SOLUTION_INDICATORS = [
     "go to", "click", "restart", "open", "navigate", "check",
     "verify", "press", "unplug", "turn off", "log out", "clear"
 ]
+
+OUT_OF_SCOPE_LIMIT = 2
 
 
 def is_resolved_by_agent(response: str) -> bool:
@@ -47,6 +51,31 @@ def is_failure_response(text: str) -> bool:
 
 def is_solution_response(text: str) -> bool:
     return any(phrase in text.lower() for phrase in SOLUTION_INDICATORS)
+
+def is_out_of_scope(text: str) -> bool:
+    """
+    Detects if the user message has nothing to do with IT or store operations.
+    Uses LLM for accuracy.
+    """
+    response = client.chat.completions.create(
+        model=MODEL,
+        messages=[
+            {
+                "role": "system",
+                "content": (
+                    "You are a classifier. Determine if the user message is related to "
+                    "McDonald's store IT or operations support. "
+                    "Reply with only YES if it is related, or NO if it is not related. "
+                    "Nothing else."
+                )
+            },
+            {"role": "user", "content": text}
+        ],
+        temperature=0.0,
+        max_tokens=5
+    )
+    result = response.choices[0].message.content.strip().upper()
+    return result == "NO"
 
 
 def extract_name_via_llm(raw: str) -> str:
@@ -193,12 +222,13 @@ def finalize_and_log(
 def run_voice_loop():
     conversation_history = []
     failed_attempts = 0
+    out_of_scope_count = 0
     last_was_solution = False
     escalation_manager = None
     start_time = time.time()
 
     speak("Hello, thank you for calling McDonald's crew support. My name is Max. Who am I speaking with today?")
-    time.sleep(0.8)
+    time.sleep(1.5)
 
     caller_name, store_id = get_caller_info()
 
@@ -208,7 +238,7 @@ def run_voice_loop():
     })
 
     speak(f"Perfect. Store {store_id}. Please describe your issue.")
-    time.sleep(0.8)
+    time.sleep(1.5)
 
     while True:
         user_input = listen_and_transcribe(duration=6)
@@ -236,6 +266,16 @@ def run_voice_loop():
                 )
             speak("Thank you for calling. Have a good day.")
             break
+
+        if is_out_of_scope(user_input):
+            out_of_scope_count += 1
+            if out_of_scope_count >= OUT_OF_SCOPE_LIMIT:
+                speak("I can only assist with McDonald's IT and operations issues. I will close this call now. Please call back if you have a system related issue. Have a good day.")
+                break
+            speak("I can only help with McDonald's store IT and operations issues. Do you have a system related problem I can assist with?")
+            continue
+
+        out_of_scope_count = 0
 
         conversation_history.append({"role": "user", "content": user_input})
 
