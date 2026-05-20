@@ -11,3 +11,5 @@ CALL-20260519235412,2026-05-19 23:54:12,Yeah,two,The screens at the front counte
 CALL-20260520143558,2026-05-20 14:35:58,Thank you. Thank you.,"3, 4, 1.",The user is unable to login to their web page due to a network not available error.,P2,Unresolved,True,3,101.36
 CALL-20260520150822,2026-05-20 15:08:22,Aditya,451,The entire store's front counter screens were down due to a 451 error.,P3,Unresolved,False,0,288.35
 CALL-20260520151714,2026-05-20 15:17:14,Aditya,451,"The printer in store 451 is not working, showing a red dot with no error message.",P2,Resolved,False,0,183.15
+CALL-20260520154235,2026-05-20 15:42:35,Aditya,351,The front counter screen and printer were not working properly.,P3,Unresolved,False,0,282.76
+CALL-20260520155619,2026-05-20 15:56:19,Atitya,728,"The user did not have a McDonald's IT issue, but rather a personal medical concern.",P2,Unresolved,False,0,252.13

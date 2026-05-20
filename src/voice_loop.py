@@ -11,7 +11,10 @@ from rag import retrieve_solution
 RESOLUTION_INDICATORS = [
     "issue is resolved", "closing the ticket", "glad it's working",
     "great to hear", "happy to hear", "pleased to hear",
-    "back up", "working now", "resolved", "fixed", "glad to hear"
+    "back up", "working now", "resolved", "fixed", "glad to hear",
+    "have a good day", "resume normal", "anything else",
+    "you're welcome", "welcome, have", "without any issues",
+    "functioning as expected", "normal operations"
 ]
 
 PRIORITY_ORDER = {"P1": 1, "P2": 2, "P3": 3, "P4": 4}
@@ -216,12 +219,16 @@ def run_voice_loop():
 
         if any(phrase in user_input.lower() for phrase in EXIT_PHRASES):
             if escalation_manager:
-                from_history = any(
+                from_agent = any(
                     is_resolved_by_agent(m["content"])
                     for m in conversation_history
                     if m["role"] == "assistant"
                 )
-                resolved = "Resolved" if from_history else "Unresolved"
+                user_confirmed = any(
+                    word in user_input.lower()
+                    for word in ["resolved", "fixed", "working", "works", "done", "solved", "fine"]
+                )
+                resolved = "Resolved" if (from_agent or user_confirmed) else "Unresolved"
                 finalize_and_log(
                     caller_name, store_id, conversation_history,
                     escalation_manager, resolved,

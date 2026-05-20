@@ -48,6 +48,10 @@ def transcribe_audio(audio_bytes: bytes) -> str:
         language="en",
         response_format="text"
     )
+
+    if not isinstance(transcription, str):
+        return ""
+
     return transcription.strip()
 
 
