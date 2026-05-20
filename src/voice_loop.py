@@ -29,12 +29,14 @@ SOLUTION_INDICATORS = [
     "verify", "press", "unplug", "turn off", "log out", "clear"
 ]
 
+
 def is_resolved_by_agent(response: str) -> bool:
     return any(phrase in response.lower() for phrase in RESOLUTION_INDICATORS)
 
 
 def should_upgrade_priority(current: str, new: str) -> bool:
     return PRIORITY_ORDER.get(new, 4) < PRIORITY_ORDER.get(current, 4)
+
 
 def is_failure_response(text: str) -> bool:
     return any(phrase in text.lower() for phrase in FAILURE_INDICATORS)
@@ -45,10 +47,6 @@ def is_solution_response(text: str) -> bool:
 
 
 def extract_name_via_llm(raw: str) -> str:
-    """
-    Uses Groq LLM to extract a proper noun name from raw transcription.
-    Returns just the name string or None if no clear name found.
-    """
     if not raw or len(raw.strip()) < 2:
         return None
 
@@ -63,10 +61,7 @@ def extract_name_via_llm(raw: str) -> str:
                     "If no clear name is present, return UNKNOWN."
                 )
             },
-            {
-                "role": "user",
-                "content": raw
-            }
+            {"role": "user", "content": raw}
         ],
         temperature=0.0,
         max_tokens=10
@@ -77,10 +72,6 @@ def extract_name_via_llm(raw: str) -> str:
 
 
 def extract_store_id_via_llm(raw: str) -> str:
-    """
-    Uses Groq LLM to extract a store ID or number from raw transcription.
-    Returns just the ID string or None if no clear ID found.
-    """
     if not raw or len(raw.strip()) < 1:
         return None
 
@@ -97,10 +88,7 @@ def extract_store_id_via_llm(raw: str) -> str:
                     "If no clear store ID is present, return UNKNOWN."
                 )
             },
-            {
-                "role": "user",
-                "content": raw
-            }
+            {"role": "user", "content": raw}
         ],
         temperature=0.0,
         max_tokens=15
@@ -111,10 +99,6 @@ def extract_store_id_via_llm(raw: str) -> str:
 
 
 def detect_priority_from_rag(user_input: str) -> str:
-    """
-    Retrieves relevant solution context and parses the PRIORITY field.
-    Falls back to P3 if no match found.
-    """
     context = retrieve_solution(user_input)
     match = re.search(r'PRIORITY:\s*(P[1-4])', context)
     if match:
@@ -123,49 +107,51 @@ def detect_priority_from_rag(user_input: str) -> str:
 
 
 def get_caller_info() -> tuple:
-   
+    name_raw = listen_and_transcribe(duration=4)
+    name = extract_name_via_llm(name_raw)
+
     if not name:
         speak("Sorry, could you repeat your name?")
-        time.sleep(1.2)
+        time.sleep(0.8)
         name_raw = listen_and_transcribe(duration=4)
         name = extract_name_via_llm(name_raw) or "Unknown"
 
     speak(f"Got it, {name}. Just to confirm, am I saying that right?")
-    time.sleep(1.2)
+    time.sleep(0.8)
     confirmation_raw = listen_and_transcribe(duration=4)
 
     if confirmation_raw and any(
         word in confirmation_raw.lower()
         for word in ["no", "wrong", "not", "incorrect", "nope"]
     ):
-        speak("My apologies. Could you spell your name out for me?")
-        time.sleep(1.2)
+        speak("My apologies. Could you spell your name?")
+        time.sleep(0.8)
         spelled_raw = listen_and_transcribe(duration=6)
         corrected = extract_name_via_llm(spelled_raw)
         if corrected:
             name = corrected
 
     speak(f"Thank you {name}. And your store ID?")
-    time.sleep(1.2)
+    time.sleep(0.8)
     store_raw = listen_and_transcribe(duration=4)
     store_id = extract_store_id_via_llm(store_raw)
 
     if not store_id:
         speak("Could you repeat just the store number?")
-        time.sleep(1.2)
+        time.sleep(0.8)
         store_raw = listen_and_transcribe(duration=4)
         store_id = extract_store_id_via_llm(store_raw) or "Unknown"
 
     speak(f"Store {store_id}, confirmed?")
-    time.sleep(1.2)
+    time.sleep(0.8)
     confirmation_raw = listen_and_transcribe(duration=4)
 
     if confirmation_raw and any(
         word in confirmation_raw.lower()
         for word in ["no", "wrong", "not", "incorrect", "nope"]
     ):
-        speak("My apologies. Please repeat your store number.")
-        time.sleep(1.2)
+        speak("Please repeat your store number.")
+        time.sleep(0.8)
         store_raw = listen_and_transcribe(duration=4)
         corrected = extract_store_id_via_llm(store_raw)
         if corrected:
@@ -209,10 +195,7 @@ def run_voice_loop():
     start_time = time.time()
 
     speak("Hello, thank you for calling McDonald's crew support. My name is Max. Who am I speaking with today?")
-    time.sleep(1.2)
-
-    speak(f"Perfect. Store {store_id}. Please describe your issue.")
-    time.sleep(2.0)
+    time.sleep(0.8)
 
     caller_name, store_id = get_caller_info()
 
@@ -222,7 +205,7 @@ def run_voice_loop():
     })
 
     speak(f"Perfect. Store {store_id}. Please describe your issue.")
-    time.sleep(2.0)
+    time.sleep(0.8)
 
     while True:
         user_input = listen_and_transcribe(duration=6)
@@ -253,15 +236,14 @@ def run_voice_loop():
             priority = detect_priority_from_rag(user_input)
             escalation_manager = EscalationManager(priority)
             speak(f"This is a {priority} priority issue. I will help you resolve it within {escalation_manager.sla_label}.")
-        else:
+        elif escalation_manager.priority != "P1" and len(conversation_history) <= 4:
             new_priority = detect_priority_from_rag(user_input)
             if should_upgrade_priority(escalation_manager.priority, new_priority):
-                escalation_manager.priority = new_priority
-                escalation_manager.sla_limit = escalation_manager.sla_limit
                 from escalation import SLA_LIMITS, SLA_LABELS
+                escalation_manager.priority = new_priority
                 escalation_manager.sla_limit = SLA_LIMITS[new_priority]
                 escalation_manager.sla_label = SLA_LABELS[new_priority]
-                speak(f"I am upgrading this to {new_priority} priority based on the severity.")
+                speak(f"Upgrading this to {new_priority} priority based on what you described.")
 
         if last_was_solution and is_failure_response(user_input):
             failed_attempts += 1
