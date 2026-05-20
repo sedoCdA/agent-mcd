@@ -5,3 +5,9 @@ CALL-20260518234142,2026-05-18 23:41:42,Aditya,Okay.,"All store screens are comp
 CALL-20260518234408,2026-05-18 23:44:08,Aditya,321 is my store id,User's screens are showing a red MPA error.,P1,Unresolved,True,3,93.84
 CALL-20260519105423,2026-05-19 10:54:23,Unknown,"If you have your own model, you want to deploy that and you want to learn about it.",User is having an unspecified technical issue at their McDonald's outlet.,P2,Unresolved,True,3,83.64
 CALL-20260519182503,2026-05-19 18:25:03,Test User,MCD-TEST,Test issue for unit test,P3,Resolved,False,1,45.0
+CALL-20260519183159,2026-05-19 18:31:59,Let's,132,The user's screens are completely black and not displaying anything.,P2,Unresolved,True,3,114.07
+CALL-20260519234000,2026-05-19 23:40:00,My,"3,",The user's store screens are completely black and not working.,P2,Unresolved,True,3,145.27
+CALL-20260519235412,2026-05-19 23:54:12,Yeah,two,The screens at the front counter are not working.,P2,Unresolved,True,3,89.67
+CALL-20260520143558,2026-05-20 14:35:58,Thank you. Thank you.,"3, 4, 1.",The user is unable to login to their web page due to a network not available error.,P2,Unresolved,True,3,101.36
+CALL-20260520150822,2026-05-20 15:08:22,Aditya,451,The entire store's front counter screens were down due to a 451 error.,P3,Unresolved,False,0,288.35
+CALL-20260520151714,2026-05-20 15:17:14,Aditya,451,"The printer in store 451 is not working, showing a red dot with no error message.",P2,Resolved,False,0,183.15

@@ -9,7 +9,7 @@ import threading
 
 
 VOICE = "en-US-AriaNeural"
-ENERGY_THRESHOLD = 600
+ENERGY_THRESHOLD = 1500
 
 
 async def _generate_audio(text: str) -> tuple:

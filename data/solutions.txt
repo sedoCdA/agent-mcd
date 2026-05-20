@@ -27,7 +27,7 @@ PRIORITY: P3
 SOLUTION: Clear the browser cache by pressing Ctrl Shift Delete and clearing all cached data. Restart the browser. If the portal still does not load, check internet connectivity by opening any other website. If internet is down, restart the router by unplugging it for 30 seconds and plugging it back in. Contact ISP if internet does not restore.
 
 ISSUE: Login credentials not working
-PRIORITY: P2
+PRIORITY: P3
 SOLUTION: Verify the crew member is entering the correct employee ID. Ensure Caps Lock is not on. If the password has been forgotten, the store manager can reset it from the admin panel under User Management. If the admin panel itself is inaccessible, escalate to the regional IT helpdesk with the employee ID.
 
 ISSUE: Temperature monitoring system not updating
@@ -43,7 +43,7 @@ PRIORITY: P1
 SOLUTION: Verify the kitchen display controller is powered on and connected to the network. Restart the Kitchen Display System application from the back office PC. Check whether orders are appearing on POS terminals but not routing to the kitchen. Restart the order routing service from Services in Task Manager. If no orders appear after 5 minutes, switch kitchen operations to printed receipts and escalate to IT support immediately.
 
 ISSUE: Employee not showing on scheduling portal
-PRIORITY: P2
+PRIORITY: P4
 SOLUTION: Open the employee management portal and verify the employee profile is active. Run a manual sync from the HR integration settings. Ensure the employee has been assigned to the correct store location. If the employee still does not appear, clear the portal cache and log out/in again. Escalate to HR systems support if sync fails repeatedly.
 
 ISSUE: Main server powered off unexpectedly
@@ -63,7 +63,7 @@ PRIORITY: P2
 SOLUTION: Check the headset battery level and ensure the charging dock is connected. Restart the drive thru communication base station. Verify all crew headsets are paired correctly. If only one headset is affected, replace the battery pack or swap devices. Escalate for hardware replacement if communication remains unavailable.
 
 ISSUE: Customer kiosks showing blank screen
-PRIORITY: P1
+PRIORITY: P2
 SOLUTION: Verify the kiosk PC and display power indicators are on. Restart the kiosk application from the maintenance panel. Check HDMI and power cable connections behind the kiosk. If all kiosks are blank simultaneously, verify the content server is online. Escalate immediately if kiosks fail to recover after restart.
 
 ISSUE: Online delivery orders not syncing into POS
@@ -71,7 +71,7 @@ PRIORITY: P1
 SOLUTION: Open the delivery integration dashboard and verify all third-party delivery channels are connected. Restart the DeliverySyncService from the back office PC. Run a manual sync test from the integrations page. If orders still do not import, temporarily manage delivery orders manually using delivery partner tablets and escalate to integration support.
 
 ISSUE: Crew portal showing access denied
-PRIORITY: P2
+PRIORITY: P3
 SOLUTION: Verify the employee role permissions in the admin panel under Access Management. Ensure the crew member account is active and assigned to the correct store. Clear browser cookies and cache before retrying login. If multiple employees receive the same error, restart the authentication service on the back office server.
 
 ISSUE: Store network completely unavailable
