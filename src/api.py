@@ -18,6 +18,9 @@ import tempfile
 import os
 from pathlib import Path
 
+import sys
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -233,18 +236,22 @@ app.add_middleware(
 
 # FIX #4: Serve frontend/index.html via HTTP so Chrome grants persistent mic permission.
 # Place index.html in ../frontend/ relative to this api.py file.
-FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
+CURRENT_DIR = Path(__file__).parent.resolve()
+FRONTEND_DIR = (CURRENT_DIR.parent / "frontend").resolve()
+
+if not FRONTEND_DIR.exists():
+    FRONTEND_DIR = (CURRENT_DIR / "frontend").resolve()
+
 if FRONTEND_DIR.exists():
     app.mount("/static", StaticFiles(directory=str(FRONTEND_DIR)), name="static")
 
 @app.get("/")
 def serve_frontend():
-    """Serve the frontend UI at http://localhost:8000"""
+    """Serve the frontend UI at the Root URL"""
     index = FRONTEND_DIR / "index.html"
     if index.exists():
         return FileResponse(str(index))
-    return {"message": "Frontend not found. Place index.html in the frontend/ folder."}
-
+    return {"message": f"Frontend folder not found. Checked path: {FRONTEND_DIR}"}
 
 # ── Request / Response models ──────────────────────────────────────────────────
 

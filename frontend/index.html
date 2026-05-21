@@ -803,7 +803,13 @@
 /* ═══════════════════════════════════════════════════════════
    CONFIG
 ═══════════════════════════════════════════════════════════ */
-const API_BASE = 'http://localhost:8000';
+/* ═══════════════════════════════════════════════════════════
+    DYNAMIC API ROUTING (Production & Local Environment Safe)
+═══════════════════════════════════════════════════════════ */
+const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:8000'                      // Local Development URL
+    : window.location.origin;                      // Auto-resolves Hugging Face Space Production URL
+    
 let sessionId      = null;
 let sessionActive  = false;
 let timerInterval  = null;
