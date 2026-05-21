@@ -13,3 +13,23 @@ CALL-20260520150822,2026-05-20 15:08:22,Aditya,451,The entire store's front coun
 CALL-20260520151714,2026-05-20 15:17:14,Aditya,451,"The printer in store 451 is not working, showing a red dot with no error message.",P2,Resolved,False,0,183.15
 CALL-20260520154235,2026-05-20 15:42:35,Aditya,351,The front counter screen and printer were not working properly.,P3,Unresolved,False,0,282.76
 CALL-20260520155619,2026-05-20 15:56:19,Atitya,728,"The user did not have a McDonald's IT issue, but rather a personal medical concern.",P2,Unresolved,False,0,252.13
+CALL-20260520211213,2026-05-20 21:12:13,Aditya,321,Crew members are unable to login into the website despite using correct username and password.,P3,Unresolved,False,0,220.67
+CALL-20260520224402,2026-05-20 22:44:02,Adityan,721,The crew was unable to log in to the system.,P2,Resolved,False,0,212.2
+CALL-20260521094504,2026-05-21 09:45:04,Aditya,245,The store is down.,P1,Resolved,False,0,209.17
+CALL-20260521100421,2026-05-21 10:04:21,Aditya,721,The user's store system was down and unable to process orders.,P1,Resolved,False,0,115.89
+CALL-20260521100856,2026-05-21 10:08:56,John,123,Employees are unable to login to their portal.,P2,Unresolved,False,0,184.12
+CALL-20260521145904,2026-05-21 14:59:04,So We Will Try To Give,Unknown,The crew interview module is not loading properly after deployment.,P3,Unresolved,True,0,126.15
+CALL-20260521203933,2026-05-21 20:39:33,Aditya,721,The store printer is not working despite trying various troubleshooting steps.,P3,Resolved,False,1,171.13
+CALL-20260521205742,2026-05-21 20:57:42,Aditya,721,A crew person is unable to login to their account.,P3,Resolved,False,0,123.8
+CALL-20260521205955,2026-05-21 20:59:55,Aditya,721,One of the store screens is not working.,P1,Unresolved,True,0,87.04
+CALL-20260521211506,2026-05-21 21:15:06,Aditya,271,A store crew member is unable to login to their account due to an authentication error.,P3,Resolved,False,0,120.63
+CALL-20260521211859,2026-05-21 21:18:59,Aditya,132,"All store screens are not working, causing an inability to take orders.",P1,Unresolved,True,3,83.7
+CALL-20260521213152,2026-05-21 21:31:52,Aditya,321,"All screens in the store are not working, preventing order taking.",P2,Unresolved,False,0,68.0
+CALL-20260521213538,2026-05-21 21:35:38,Aditya,173,"All screens and systems are down, preventing the user from serving customers.",P1,Unresolved,False,1,105.2
+CALL-20260521213759,2026-05-21 21:37:59,Aditya,123,The store has a power outage and is unable to serve customers.,P3,Unresolved,False,0,75.43
+CALL-20260521214201,2026-05-21 21:42:01,Aditya,321,The user was unable to serve customers due to storage being down.,P1,Resolved,False,0,168.32
+CALL-20260521220051,2026-05-21 22:00:51,Aditya,108,"The user's store system is completely down, preventing them from serving customers.",P3,Resolved,False,0,63.35
+CALL-20260521221053,2026-05-21 22:10:53,Aditya,108,The user's store system was completely down and unable to take orders or serve customers.,P1,Resolved,False,0,144.42
+CALL-20260521221342,2026-05-21 22:13:42,Speak,108,"All store screens were down, unable to take orders or serve customers.",P1,Resolved,False,0,99.47
+CALL-20260521222231,2026-05-21 22:22:31,Max,123,The user's system was down and they were unable to solve it.,P3,Resolved,False,0,58.58
+CALL-20260521222410,2026-05-21 22:24:10,Jack,108,The store screen was not working.,P3,Resolved,False,0,38.9

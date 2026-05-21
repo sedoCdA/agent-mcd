@@ -6,7 +6,7 @@ ISSUE: Inventory not updating
 PRIORITY: P2
 SOLUTION: Open the inventory management portal on the back office system. Click on Manual Sync under the Tools menu. If the sync fails, check that the back office PC is connected to the internet. Restart the inventory service by going to Services in Task Manager, finding McDInventoryService, and clicking Restart. Allow 5 minutes for full sync.
 
-ISSUE: Store system completely down
+ISSUE: Store completely down, unable to serve customers
 PRIORITY: P1
 SOLUTION: First check if the main server under the counter is powered on. Verify all network cables are connected. Restart the main server by pressing the reset button. If the system does not come back within 5 minutes, switch to offline mode using the laminated offline procedure card kept near the register. Escalate immediately to the regional IT team.
 

@@ -1,0 +1,1526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Max — McDonald's Crew Support</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ─── RESET & TOKENS ─────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --red:        #DA291C;
+    --red-dark:   #A81F14;
+    --red-light:  #f04236;
+    --gold:       #FFC72C;
+    --gold-dark:  #e6aa00;
+    --gold-pale:  #fff3cc;
+    --cream:      #FFFBF0;
+    --ink:        #1A1208;
+    --ink-soft:   #4A3F30;
+    --smoke:      #F2EDE3;
+    --border:     #E8DFC8;
+    --white:      #FFFFFF;
+    --success:    #2e7d32;
+    --warn:       #e65100;
+
+    --radius-sm:  8px;
+    --radius-md:  16px;
+    --radius-lg:  24px;
+    --radius-xl:  32px;
+
+    --shadow-sm:  0 2px 8px rgba(26,18,8,.08);
+    --shadow-md:  0 6px 24px rgba(26,18,8,.13);
+    --shadow-lg:  0 16px 48px rgba(26,18,8,.18);
+  }
+
+  html, body { margin: 0; padding: 0; overflow: hidden; }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    /* position:fixed inset:0 is bulletproof on Windows at any DPI/zoom level
+       unlike 100vh which can be taller than the actual available space */
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ─── HEADER ─────────────────────────────────────────────── */
+  header {
+    background: var(--red);
+    padding: 0 28px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 20px rgba(218,41,28,.35);
+    position: relative;
+    z-index: 10;
+    flex-shrink: 0;
+  }
+
+  .header-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .logo-arches {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 38px;
+    color: var(--gold);
+    line-height: 1;
+    letter-spacing: -1px;
+    text-shadow: 0 2px 8px rgba(0,0,0,.25);
+  }
+
+  .brand-text h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    color: var(--white);
+    letter-spacing: 2px;
+    line-height: 1;
+  }
+
+  .brand-text p {
+    font-size: 11px;
+    color: rgba(255,255,255,.65);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .header-status {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .status-badge {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 12px;
+    color: var(--white);
+    font-weight: 500;
+    letter-spacing: .5px;
+  }
+
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #aaa;
+    transition: background .3s;
+  }
+
+  .status-dot.active { background: var(--gold); animation: pulse-dot 1.4s infinite; }
+  .status-dot.recording { background: #ff6b6b; animation: pulse-dot .7s infinite; }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: .5; transform: scale(1.3); }
+  }
+
+  .timer-display {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    color: var(--gold);
+    letter-spacing: 2px;
+  }
+
+  /* ─── MAIN LAYOUT ────────────────────────────────────────── */
+  .app-body {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    flex: 1;
+    min-height: 0;         /* CRITICAL: lets flex child shrink below content size */
+    overflow: hidden;
+  }
+
+  /* ─── SIDEBAR ────────────────────────────────────────────── */
+  aside {
+    background: var(--white);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .sidebar-section {
+    padding: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sidebar-section h3 {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 14px;
+    font-weight: 600;
+  }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--smoke);
+    font-size: 13px;
+  }
+  .info-row:last-child { border-bottom: none; }
+  .info-label { color: var(--ink-soft); font-weight: 400; }
+  .info-value {
+    font-weight: 600;
+    color: var(--ink);
+    font-size: 13px;
+    text-align: right;
+    max-width: 140px;
+    word-break: break-word;
+  }
+
+  /* Priority badge */
+  .priority-chip {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .5px;
+  }
+  .p1 { background: #fdecea; color: #c62828; }
+  .p2 { background: #fff3e0; color: #e65100; }
+  .p3 { background: #fff8e1; color: #f57f17; }
+  .p4 { background: #e8f5e9; color: #2e7d32; }
+  .p-none { background: var(--smoke); color: var(--ink-soft); }
+
+  /* SLA bar */
+  .sla-bar-wrap { margin-top: 4px; }
+  .sla-label-row { display: flex; justify-content: space-between; font-size: 11px; color: var(--ink-soft); margin-bottom: 5px; }
+  .sla-bar-track {
+    height: 6px; background: var(--smoke); border-radius: 4px; overflow: hidden;
+  }
+  .sla-bar-fill {
+    height: 100%; border-radius: 4px;
+    background: linear-gradient(90deg, var(--gold), var(--red));
+    transition: width .5s, background .5s;
+    width: 0%;
+  }
+
+  /* Attempts indicator */
+  .attempts-dots { display: flex; gap: 6px; margin-top: 4px; }
+  .attempt-dot {
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--smoke);
+    border: 2px solid var(--border);
+    transition: background .3s, border-color .3s;
+  }
+  .attempt-dot.used { background: var(--red); border-color: var(--red-dark); }
+
+  /* Log panel */
+  .log-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 0;
+  }
+
+  .log-header {
+    padding: 16px 20px 10px;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .log-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .log-entry {
+    background: var(--smoke);
+    border-radius: var(--radius-sm);
+    padding: 8px 10px;
+    font-size: 11px;
+    border-left: 3px solid var(--border);
+    transition: border-color .2s;
+    cursor: default;
+  }
+  .log-entry:hover { border-color: var(--gold); }
+  .log-entry .log-top {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 3px;
+  }
+  .log-entry .log-name { font-weight: 600; color: var(--ink); font-size: 12px; }
+  .log-entry .log-time { color: var(--ink-soft); font-size: 10px; }
+  .log-entry .log-issue { color: var(--ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .log-entry .log-badges { display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap; }
+  .log-badge {
+    font-size: 9px; font-weight: 700; letter-spacing: .4px;
+    padding: 1px 6px; border-radius: 8px;
+    text-transform: uppercase;
+  }
+  .badge-resolved { background: #e8f5e9; color: #2e7d32; }
+  .badge-unresolved { background: #fdecea; color: #c62828; }
+  .badge-escalated { background: #fff3e0; color: #e65100; }
+
+  /* ─── CHAT AREA ──────────────────────────────────────────── */
+  .chat-area {
+    display: flex;
+    flex-direction: column;
+    background: var(--cream);
+    position: relative;
+    overflow: hidden;
+    min-height: 0;        /* FIX: allows flex child to respect overflow scroll */
+  }
+
+  /* Subtle pattern background */
+  .chat-area::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 15% 20%, rgba(255,199,44,.07) 0%, transparent 50%),
+      radial-gradient(circle at 85% 75%, rgba(218,41,28,.05) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Decorative large M watermark */
+  .chat-watermark {
+    position: absolute;
+    bottom: 100px;
+    right: -30px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 320px;
+    color: rgba(255,199,44,.06);
+    line-height: 1;
+    pointer-events: none;
+    z-index: 0;
+    user-select: none;
+  }
+
+  .chat-messages {
+    flex: 1;
+    min-height: 0;        /* FIX: without this Chrome flex children ignore overflow */
+    overflow-y: auto;
+    padding: 24px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    position: relative;
+    z-index: 1;
+    scroll-behavior: smooth;
+  }
+
+  /* Scrollbar styling */
+  .chat-messages::-webkit-scrollbar { width: 4px; }
+  .chat-messages::-webkit-scrollbar-track { background: transparent; }
+  .chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  /* Message rows */
+  .msg-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    animation: msg-in .3s cubic-bezier(.22,1,.36,1) both;
+  }
+  .msg-row.agent { flex-direction: row; }
+  .msg-row.user  { flex-direction: row-reverse; }
+
+  @keyframes msg-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .msg-avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    box-shadow: var(--shadow-sm);
+  }
+  .msg-row.agent .msg-avatar { background: var(--red); color: var(--gold); }
+  .msg-row.user  .msg-avatar { background: var(--gold); color: var(--ink); }
+
+  .msg-bubble-wrap { max-width: 65%; display: flex; flex-direction: column; gap: 3px; }
+  .msg-row.agent .msg-bubble-wrap { align-items: flex-start; }
+  .msg-row.user  .msg-bubble-wrap { align-items: flex-end; }
+
+  .msg-sender {
+    font-size: 10px;
+    letter-spacing: .8px;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--ink-soft);
+    padding: 0 4px;
+  }
+
+  .msg-bubble {
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    line-height: 1.55;
+    font-weight: 400;
+    position: relative;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .msg-row.agent .msg-bubble {
+    background: var(--white);
+    color: var(--ink);
+    border-bottom-left-radius: 4px;
+    border: 1px solid var(--border);
+  }
+
+  .msg-row.user .msg-bubble {
+    background: var(--red);
+    color: var(--white);
+    border-bottom-right-radius: 4px;
+  }
+
+  .msg-time {
+    font-size: 10px;
+    color: var(--ink-soft);
+    padding: 0 4px;
+  }
+
+  /* System / info messages */
+  .msg-system {
+    text-align: center;
+    font-size: 11px;
+    color: var(--ink-soft);
+    background: rgba(255,199,44,.15);
+    border: 1px solid rgba(255,199,44,.35);
+    border-radius: 20px;
+    padding: 5px 16px;
+    align-self: center;
+    font-weight: 500;
+    letter-spacing: .3px;
+    animation: msg-in .3s ease both;
+  }
+
+  /* Typing indicator */
+  .typing-indicator {
+    display: none;
+    flex-direction: row;
+    gap: 10px;
+    align-items: flex-end;
+  }
+  .typing-indicator.show { display: flex; }
+
+  .typing-bubble {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    border-bottom-left-radius: 4px;
+    padding: 14px 18px;
+    display: flex; gap: 5px; align-items: center;
+    box-shadow: var(--shadow-sm);
+  }
+  .typing-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--gold);
+    animation: bounce 1.2s infinite;
+  }
+  .typing-dot:nth-child(2) { animation-delay: .15s; background: var(--red); }
+  .typing-dot:nth-child(3) { animation-delay: .3s; background: var(--gold); }
+
+  @keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-7px); }
+  }
+
+  /* ─── INPUT BAR ──────────────────────────────────────────── */
+  .input-bar {
+    padding: 16px 24px;
+    background: var(--white);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+    z-index: 2;
+    box-shadow: 0 -4px 20px rgba(26,18,8,.06);
+    flex-shrink: 0;        /* CRITICAL: never let this get pushed off screen */
+    min-height: 72px;
+  }
+
+  .text-input-wrap {
+    flex: 1;
+    background: var(--smoke);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-xl);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .text-input-wrap:focus-within {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(255,199,44,.18);
+  }
+
+  #textInput {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    padding: 13px 0;
+  }
+  #textInput::placeholder { color: #bbb; }
+
+  .btn-send {
+    background: var(--gold);
+    color: var(--ink);
+    border: none;
+    border-radius: 50%;
+    width: 40px; height: 40px;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .2s, transform .15s;
+    flex-shrink: 0;
+  }
+  .btn-send:hover { background: var(--gold-dark); transform: scale(1.08); }
+  .btn-send:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+
+  /* Mic button */
+  .btn-mic {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    border: none;
+    background: var(--red);
+    color: var(--white);
+    font-size: 22px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .2s, transform .15s, box-shadow .2s;
+    flex-shrink: 0;
+    box-shadow: 0 4px 14px rgba(218,41,28,.4);
+    position: relative;
+  }
+  .btn-mic:hover { background: var(--red-light); transform: scale(1.06); }
+  .btn-mic.recording {
+    background: var(--red-dark);
+    box-shadow: 0 0 0 0 rgba(218,41,28,.5);
+    animation: mic-pulse 1s infinite;
+  }
+  .btn-mic:disabled { opacity: .4; cursor: not-allowed; animation: none; }
+
+  @keyframes mic-pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(218,41,28,.55); }
+    70%  { box-shadow: 0 0 0 14px rgba(218,41,28,0); }
+    100% { box-shadow: 0 0 0 0 rgba(218,41,28,0); }
+  }
+
+  /* Session control buttons */
+  .btn-session {
+    padding: 10px 22px;
+    border-radius: var(--radius-xl);
+    border: none;
+    font-family: 'Outfit', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: .4px;
+    transition: all .2s;
+    flex-shrink: 0;
+  }
+  .btn-start {
+    background: var(--gold);
+    color: var(--ink);
+    box-shadow: 0 3px 10px rgba(255,199,44,.4);
+  }
+  .btn-start:hover { background: var(--gold-dark); transform: translateY(-1px); }
+  .btn-end {
+    background: var(--smoke);
+    color: var(--red);
+    border: 1.5px solid var(--border);
+  }
+  .btn-end:hover { background: #fdecea; border-color: var(--red); }
+  .btn-session:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+
+  /* ─── EMPTY STATE ────────────────────────────────────────── */
+  .empty-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 40px;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+  }
+  .empty-arches {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 72px;
+    color: var(--gold);
+    line-height: 1;
+    text-shadow: 0 4px 20px rgba(255,199,44,.3);
+  }
+  .empty-state h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 2px;
+    color: var(--ink);
+  }
+  .empty-state p {
+    font-size: 14px;
+    color: var(--ink-soft);
+    max-width: 280px;
+    line-height: 1.6;
+  }
+  .empty-state .start-hint {
+    background: var(--gold-pale);
+    border: 1px solid rgba(255,199,44,.5);
+    border-radius: var(--radius-md);
+    padding: 10px 20px;
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-top: 8px;
+  }
+
+  /* ─── SCROLLBAR GLOBAL ───────────────────────────────────── */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  /* ─── TOAST ──────────────────────────────────────────────── */
+  #toast {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--ink);
+    color: var(--white);
+    padding: 10px 22px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    opacity: 0;
+    transition: all .3s;
+    z-index: 100;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  #toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ─── CONNECTION STATUS BAR ──────────────────────────────── */
+  .conn-bar {
+    background: var(--warn);
+    color: white;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px;
+    letter-spacing: .5px;
+    display: none;
+    flex-shrink: 0;
+  }
+  .conn-bar.show { display: block; }
+
+  /* ─── PRIORITY FLASH ─────────────────────────────────────── */
+  @keyframes priority-flash {
+    0%, 100% { opacity: 1; }
+    50% { opacity: .4; }
+  }
+  .p1-flash { animation: priority-flash .6s 4; }
+</style>
+</head>
+<body>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- Connection warning -->
+<div class="conn-bar" id="connBar">⚠ Backend offline — demo mode active. Run uvicorn then open <strong>http://localhost:8000</strong> (not the file directly)</div>
+
+<!-- Header -->
+<header>
+  <div class="header-brand">
+    <div class="logo-arches">M</div>
+    <div class="brand-text">
+      <h1>MAX — Crew Support</h1>
+      <p>McDonald's Internal IT Assistant</p>
+    </div>
+  </div>
+  <div class="header-status">
+    <div class="status-badge" id="statusBadge">
+      <div class="status-dot" id="statusDot"></div>
+      <span id="statusText">Idle</span>
+    </div>
+    <div class="timer-display" id="timerDisplay">00:00</div>
+  </div>
+</header>
+
+<!-- App body -->
+<div class="app-body">
+
+  <!-- ── SIDEBAR ── -->
+  <aside>
+    <!-- Call info -->
+    <div class="sidebar-section">
+      <h3>Call Info</h3>
+      <div class="info-row">
+        <span class="info-label">Agent</span>
+        <span class="info-value">Max (AI)</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Caller</span>
+        <span class="info-value" id="infoName">—</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Store ID</span>
+        <span class="info-value" id="infoStore">—</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Session</span>
+        <span class="info-value" id="infoSession">—</span>
+      </div>
+    </div>
+
+    <!-- Priority & SLA -->
+    <div class="sidebar-section">
+      <h3>Priority & SLA</h3>
+      <div class="info-row">
+        <span class="info-label">Priority</span>
+        <span class="info-value">
+          <span class="priority-chip p-none" id="priorityChip">—</span>
+        </span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Attempts</span>
+        <span class="info-value">
+          <div class="attempts-dots" id="attemptsDots">
+            <div class="attempt-dot"></div>
+            <div class="attempt-dot"></div>
+            <div class="attempt-dot"></div>
+          </div>
+        </span>
+      </div>
+      <div style="padding: 8px 0;">
+        <div class="sla-bar-wrap">
+          <div class="sla-label-row">
+            <span>SLA</span>
+            <span id="slaLabel">—</span>
+          </div>
+          <div class="sla-bar-track">
+            <div class="sla-bar-fill" id="slaFill"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Call log -->
+    <div class="log-section">
+      <div class="log-header">Recent Calls</div>
+      <div class="log-list" id="logList">
+        <div style="font-size:12px;color:var(--ink-soft);padding:10px;text-align:center;">No calls logged yet.</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── CHAT AREA ── -->
+  <div class="chat-area">
+    <div class="chat-watermark">M</div>
+
+    <!-- Empty state shown before session starts -->
+    <div class="empty-state" id="emptyState">
+      <div class="empty-arches">M</div>
+      <h2>Welcome to Crew Support</h2>
+      <p>Hi there! I'm Max, your McDonald's internal IT support assistant. Start a session to begin.</p>
+      <div class="start-hint">Click <strong>Start Session</strong> below to connect</div>
+    </div>
+
+    <!-- Messages container (hidden until session) -->
+    <div class="chat-messages" id="chatMessages" style="display:none;"></div>
+
+    <!-- Typing indicator -->
+    <div class="typing-indicator" id="typingIndicator" style="display:none;padding:0 28px 8px;">
+      <div class="msg-avatar" style="background:var(--red);color:var(--gold);font-family:'Bebas Neue',sans-serif;font-size:16px;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">M</div>
+      <div class="typing-bubble">
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+      </div>
+    </div>
+
+    <!-- Input bar -->
+    <div class="input-bar">
+      <button class="btn-session btn-start" id="btnStart" onclick="startSession()">▶ Start Session</button>
+      <button class="btn-session btn-end" id="btnEnd" onclick="endSession()" disabled>■ End Call</button>
+      <button id="btnTTS" onclick="toggleTTS()" title="Voice on — click to mute"
+        style="background:none;border:none;font-size:20px;cursor:pointer;padding:4px 6px;opacity:.75;transition:opacity .2s;"
+        onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.75">🔊</button>
+
+      <div class="text-input-wrap">
+        <input type="text" id="textInput" placeholder="Type a message or use the mic…" disabled
+               onkeydown="if(event.key==='Enter') sendText()" />
+      </div>
+      <button class="btn-send" id="btnSend" onclick="sendText()" disabled title="Send message">
+        ➤
+      </button>
+      <button class="btn-mic" id="btnMic" onclick="toggleMic()" disabled title="Start live mic (auto-listens like a call)">
+        🎙
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   CONFIG
+═══════════════════════════════════════════════════════════ */
+const API_BASE = 'http://localhost:8000';
+let sessionId      = null;
+let sessionActive  = false;
+let timerInterval  = null;
+let timerSeconds   = 0;
+let failedAttempts = 0;
+let currentPriority = null;
+let slaStartTime   = null;
+const SLA_LIMITS   = { P1: 1800, P2: 3600, P3: 14400, P4: 86400 };
+const callLog      = [];
+let backendOnline  = false;
+
+/* ═══════════════════════════════════════════════════════════
+   HEALTH CHECK
+═══════════════════════════════════════════════════════════ */
+async function checkHealth() {
+  try {
+    const r = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(2000) });
+    backendOnline = r.ok;
+  } catch {
+    backendOnline = false;
+  }
+  document.getElementById('connBar').classList.toggle('show', !backendOnline);
+}
+
+checkHealth();
+setInterval(checkHealth, 8000);
+
+/* ═══════════════════════════════════════════════════════════
+   SESSION
+═══════════════════════════════════════════════════════════ */
+async function startSession() {
+  document.getElementById('btnStart').disabled = true;
+
+  if (backendOnline) {
+    try {
+      const r = await fetch(`${API_BASE}/session/start`, { method: 'POST' });
+      const data = await r.json();
+      sessionId = data.session_id;
+    } catch (e) {
+      toast('Could not connect to backend.');
+      document.getElementById('btnStart').disabled = false;
+      return;
+    }
+  } else {
+    // Demo mode
+    sessionId = 'DEMO-' + Math.random().toString(36).slice(2,8).toUpperCase();
+  }
+
+  sessionActive = true;
+  slaStartTime  = Date.now();
+  failedAttempts = 0;
+  currentPriority = null;
+
+  // UI transitions
+  document.getElementById('emptyState').style.display    = 'none';
+  document.getElementById('chatMessages').style.display  = 'flex';
+  document.getElementById('btnEnd').disabled    = false;
+  document.getElementById('textInput').disabled = false;
+  document.getElementById('btnSend').disabled   = false;
+  document.getElementById('btnMic').disabled    = false;
+  document.getElementById('infoSession').textContent = sessionId;
+
+  setStatus('active', 'Live');
+  startTimer();
+
+  addSystemMsg('Session started — Max is ready to help.');
+  addAgentMsg("Hello, thank you for calling McDonald's crew support. My name is Max. Who am I speaking with today?");
+
+  // Auto-start live mic — no button click needed, just speak
+  // Small delay so the greeting TTS starts first, then mic activates after
+  setTimeout(() => {
+    if (sessionActive) startLiveListening();
+  }, 500);
+}
+
+async function endSession() {
+  // Manual End Call button — always marks Unresolved unless already resolved
+  await closeSession('Unresolved');
+}
+
+async function closeSession(status = 'Unresolved') {
+  if (!sessionActive) return;
+
+  // Tell backend to finalize + log
+  if (backendOnline && sessionId) {
+    try {
+      await fetch(`${API_BASE}/session/end`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: sessionId })
+      });
+    } catch {}
+  }
+
+  // ── FIX #1: Stop timer and SLA clock immediately ───────────
+  sessionActive = false;
+  stopTimer();
+  slaStartTime = null;     // prevents SLA bar from updating after close
+  setStatus('idle', 'Idle');
+
+  // Log to recent calls panel with correct status
+  const callEntry = {
+    time:     new Date().toLocaleTimeString(),
+    name:     document.getElementById('infoName').textContent  || '—',
+    store:    document.getElementById('infoStore').textContent || '—',
+    priority: currentPriority || '—',
+    attempts: failedAttempts,
+    duration: timerSeconds,
+    status:   status
+  };
+  callLog.unshift(callEntry);
+  renderCallLog();
+
+  sessionId = null;
+
+  // Disable inputs
+  document.getElementById('btnEnd').disabled    = true;
+  document.getElementById('textInput').disabled = true;
+  document.getElementById('btnSend').disabled   = true;
+  document.getElementById('btnMic').disabled    = true;
+  document.getElementById('btnStart').disabled  = false;
+
+  // Stop live mic and TTS
+  stopLiveListening();
+  if (window.speechSynthesis) window.speechSynthesis.cancel();
+
+  // Reset sidebar info (keep chat visible so user can read transcript)
+  document.getElementById('infoName').textContent    = '—';
+  document.getElementById('infoStore').textContent   = '—';
+  document.getElementById('infoSession').textContent = '—';
+  setPriority(null);
+  resetAttemptDots(0);
+  document.getElementById('slaFill').style.width  = '0%';
+  document.getElementById('slaLabel').textContent = '—';
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SEND TEXT
+═══════════════════════════════════════════════════════════ */
+async function sendText() {
+  const input = document.getElementById('textInput');
+  const text  = input.value.trim();
+  if (!text || !sessionActive) return;
+  input.value = '';
+  await processUserInput(text);
+}
+
+async function processUserInput(text) {
+  addUserMsg(text);
+
+  // Show typing
+  showTyping(true);
+
+  let agentReply = '';
+  let callEnded  = false;
+  let callResolved = false;
+
+  if (backendOnline && sessionId) {
+    try {
+      const r = await fetch(`${API_BASE}/session/message`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: sessionId, message: text })
+      });
+      const data = await r.json();
+      agentReply   = data.response || data.message || 'I received your message.';
+      callEnded    = !!data.ended;
+      callResolved = !!data.resolved;
+
+      // ── FIX #2: Update sidebar from API response ──────────────
+      if (data.caller_name && data.caller_name !== 'null') {
+        document.getElementById('infoName').textContent = data.caller_name;
+      }
+      if (data.store_id && data.store_id !== 'null') {
+        document.getElementById('infoStore').textContent = data.store_id;
+      }
+      if (data.priority) {
+        setPriority(data.priority);
+        currentPriority = data.priority;
+        // Start SLA clock the moment priority is first assigned
+        if (!slaStartTime) slaStartTime = Date.now();
+      }
+      if (data.failed_attempts !== undefined) {
+        failedAttempts = data.failed_attempts;
+        resetAttemptDots(failedAttempts);
+      }
+    } catch {
+      agentReply = demoResponse(text);
+    }
+  } else {
+    // Demo mode
+    await new Promise(r => setTimeout(r, 900 + Math.random() * 600));
+    agentReply = demoResponse(text);
+  }
+
+  showTyping(false);
+  addAgentMsg(agentReply);
+  updateSLABar();
+
+  // ── FIX #1: Auto-close session when backend signals ended ──────
+  if (callEnded) {
+    const status = callResolved ? 'Resolved' : 'Unresolved';
+    addSystemMsg(callResolved ? 'Issue resolved ✓ — call closed.' : 'Call ended.');
+    await closeSession(status);
+    return;
+  }
+
+  // Fallback resolution check for demo mode
+  if (!backendOnline) {
+    const resolved = [
+      "great to hear", "glad it's working", "working now",
+      "resolved", "fixed", "have a good day", "anything else"
+    ].some(p => agentReply.toLowerCase().includes(p));
+
+    if (resolved) {
+      addSystemMsg('Issue appears resolved ✓');
+      await closeSession('Resolved');
+    }
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DEMO RESPONSES (when backend is offline)
+═══════════════════════════════════════════════════════════ */
+let demoTurn = 0;
+function demoResponse(text) {
+  const t = text.toLowerCase();
+  demoTurn++;
+
+  if (demoTurn === 1) {
+    const name = extractName(text);
+    if (name) {
+      document.getElementById('infoName').textContent = name;
+      return `Thank you ${name}. And your store ID?`;
+    }
+    return "Could you please tell me your name?";
+  }
+
+  if (demoTurn === 2) {
+    const storeMatch = text.match(/\d+/);
+    if (storeMatch) {
+      document.getElementById('infoStore').textContent = storeMatch[0];
+    }
+    return `Store ${storeMatch ? storeMatch[0] : 'confirmed'}. Please describe your issue.`;
+  }
+
+  if (t.includes('screen') || t.includes('display') || t.includes('pos')) {
+    setPriority('P2'); currentPriority = 'P2';
+    return "Try restarting the point-of-sale system. Go to Settings > Restart POS. Let me know if that resolves the issue.";
+  }
+  // Expanded failure detection — mirrors api.py FAILURE_INDICATORS fix
+  const failurePhrases = [
+    'not working','still','same','didn\'t work','already done','already tried',
+    'already checked','no luck','no result','no change','tried that','tried this',
+    'tried everything','nothing works','nothing worked','didn\'t help','not helpful'
+  ];
+  const escalationPhrases = [
+    'escalate','human','real person','supervisor','manager','transfer','specialist'
+  ];
+
+  if (escalationPhrases.some(p => t.includes(p))) {
+    addSystemMsg('Escalating to senior technician ✓');
+    setTimeout(() => closeSession('Unresolved'), 1500);
+    return "Understood. I am escalating this to a senior technician right away. You will be contacted shortly. Have a good day.";
+  }
+  if (failurePhrases.some(p => t.includes(p))) {
+    failedAttempts++;
+    resetAttemptDots(failedAttempts);
+    if (failedAttempts >= 3) {
+      addSystemMsg('Auto-escalating after 3 failed attempts');
+      setTimeout(() => closeSession('Unresolved'), 2000);
+      return "I've tried multiple solutions without success. I'm escalating this to a senior technician who will contact you shortly. Your ticket has been logged.";
+    }
+    return "Let's try another approach. Check the power cables and connections to ensure they are secure.";
+  }
+  if (t.includes('login') || t.includes('password') || t.includes('account')) {
+    setPriority('P3'); currentPriority = 'P3';
+    return "Please navigate to the crew portal and click 'Forgot Password'. Enter your employee ID to reset your credentials.";
+  }
+  if (t.includes('wifi') || t.includes('internet') || t.includes('network')) {
+    setPriority('P2'); currentPriority = 'P2';
+    return "Open the network settings and verify the router is connected. Try restarting the router by unplugging it for 30 seconds.";
+  }
+  if (t.includes('thank') || t.includes('bye') || t.includes('goodbye')) {
+    return "Great to hear everything is sorted! Have a good day and don't hesitate to call back if needed.";
+  }
+  return "I understand. Could you give me more details about what you're seeing on screen? This will help me resolve the issue faster.";
+}
+
+function extractName(text) {
+  const match = text.match(/(?:name is|i'?m|i am|this is)\s+([A-Z][a-z]+)/i);
+  return match ? match[1] : null;
+}
+
+function extractCallerInfo(text) {
+  const name = extractName(text);
+  if (name && document.getElementById('infoName').textContent === '—') {
+    document.getElementById('infoName').textContent = name;
+  }
+  const storeMatch = text.match(/(?:store\s*(?:id|number|#)?\s*)(\d{2,6})/i);
+  if (storeMatch && document.getElementById('infoStore').textContent === '—') {
+    document.getElementById('infoStore').textContent = storeMatch[1];
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TEXT-TO-SPEECH — speaks Max's replies aloud
+═══════════════════════════════════════════════════════════ */
+let ttsEnabled  = true;
+let ttsSpeaking = false;
+let ttsVoice    = null;
+
+function loadTTSVoice() {
+  const voices = window.speechSynthesis.getVoices();
+  if (!voices.length) return;
+  const preferred = [
+    'Microsoft Aria Online (Natural) - English (United States)',
+    'Microsoft Aria - English (United States)',
+    'Google US English',
+    'Google UK English Female',
+  ];
+  for (const name of preferred) {
+    const match = voices.find(v => v.name === name);
+    if (match) { ttsVoice = match; return; }
+  }
+  ttsVoice =
+    voices.find(v => v.lang === 'en-US' && v.name.toLowerCase().includes('female')) ||
+    voices.find(v => v.lang === 'en-US') ||
+    voices.find(v => v.lang.startsWith('en')) ||
+    voices[0];
+}
+if (window.speechSynthesis) {
+  window.speechSynthesis.onvoiceschanged = loadTTSVoice;
+  loadTTSVoice();
+}
+
+function speakText(text) {
+  if (!ttsEnabled || !window.speechSynthesis || !text) {
+    // If TTS is off, go straight back to listening
+    if (liveListening) resumeListening(600);
+    return;
+  }
+  window.speechSynthesis.cancel();
+  const utt    = new SpeechSynthesisUtterance(text);
+  utt.rate     = 1.1;
+  utt.pitch    = 1.0;
+  utt.volume   = 1.0;
+  if (ttsVoice) utt.voice = ttsVoice;
+
+  // Pause live listening while Max speaks — resume after
+  ttsSpeaking = true;
+  pauseListening();
+
+  utt.onend = utt.onerror = () => {
+    ttsSpeaking = false;
+    // Resume listening 600ms after Max finishes speaking
+    if (liveListening && sessionActive) resumeListening(600);
+  };
+  window.speechSynthesis.speak(utt);
+}
+
+function toggleTTS() {
+  ttsEnabled = !ttsEnabled;
+  const btn = document.getElementById('btnTTS');
+  btn.textContent = ttsEnabled ? '🔊' : '🔇';
+  btn.title       = ttsEnabled ? 'Voice on — click to mute' : 'Voice off — click to unmute';
+  if (!ttsEnabled) window.speechSynthesis.cancel();
+  toast(ttsEnabled ? 'Max voice ON' : 'Max voice OFF');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LIVE SPEECH RECOGNITION — always-on like a real phone call
+   Uses Chrome's built-in SpeechRecognition (no install needed).
+   Flow: Start session → mic auto-activates → you speak →
+         transcript appears in input box → auto-sends on pause →
+         Max replies (TTS) → mic auto-resumes. Repeat.
+═══════════════════════════════════════════════════════════ */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognition    = null;
+let liveListening  = false;   // true = live call mode is ON
+let srPaused       = false;   // true while Max is speaking
+let interimText    = '';      // live transcript preview
+
+function initSpeechRecognition() {
+  if (!SR) {
+    console.warn('SpeechRecognition not supported in this browser.');
+    return false;
+  }
+  recognition              = new SR();
+  recognition.lang         = 'en-US';
+  recognition.continuous   = false;   // fires onresult after each utterance
+  recognition.interimResults = true;  // show words as you speak
+
+  recognition.onstart = () => {
+    setMicState('listening');
+  };
+
+  recognition.onresult = (event) => {
+    let interim = '';
+    let final   = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const t = event.results[i][0].transcript;
+      if (event.results[i].isFinal) final += t;
+      else interim += t;
+    }
+    interimText = interim;
+    // Show live transcript in the input box as user speaks
+    const input = document.getElementById('textInput');
+    input.value = final || interim;
+    if (final) input.value = final;
+  };
+
+  recognition.onend = () => {
+    const input    = document.getElementById('textInput');
+    const captured = input.value.trim();
+    interimText    = '';
+
+    if (!srPaused && liveListening && captured && sessionActive) {
+      // User finished speaking — send the message
+      input.value = '';
+      setMicState('processing');
+      processUserInput(captured);
+    } else if (!srPaused && liveListening && sessionActive) {
+      // Nothing was said — restart listening silently
+      safeStart();
+    } else {
+      setMicState('paused');
+    }
+  };
+
+  recognition.onerror = (e) => {
+    // 'no-speech' is normal (silence timeout) — just restart
+    if (e.error === 'no-speech' && liveListening && !srPaused) {
+      safeStart();
+    } else if (e.error === 'not-allowed') {
+      toast('Mic blocked — click the 🔒 in Chrome address bar → Allow microphone.');
+      liveListening = false;
+      setMicState('off');
+    } else if (e.error !== 'aborted') {
+      console.warn('SR error:', e.error);
+      if (liveListening && !srPaused) setTimeout(safeStart, 500);
+    }
+  };
+
+  return true;
+}
+
+function safeStart() {
+  if (!recognition || !liveListening || srPaused) return;
+  try { recognition.start(); } catch (e) { /* already started */ }
+}
+
+function pauseListening() {
+  srPaused = true;
+  try { recognition && recognition.abort(); } catch {}
+  setMicState('paused');
+}
+
+function resumeListening(delayMs = 0) {
+  if (!liveListening || !sessionActive) return;
+  srPaused = false;
+  if (delayMs > 0) {
+    setTimeout(() => { if (!srPaused) safeStart(); }, delayMs);
+  } else {
+    safeStart();
+  }
+}
+
+function startLiveListening() {
+  if (!SR) {
+    toast('Live mic not supported in this browser. Use Chrome.');
+    return;
+  }
+  if (!recognition) {
+    const ok = initSpeechRecognition();
+    if (!ok) return;
+  }
+  liveListening = true;
+  srPaused      = false;
+  safeStart();
+  document.getElementById('btnMic').classList.add('recording');
+  document.getElementById('btnMic').title = 'Live mic ON — click to pause';
+}
+
+function stopLiveListening() {
+  liveListening = false;
+  srPaused      = false;
+  try { recognition && recognition.abort(); } catch {}
+  document.getElementById('textInput').value = '';
+  document.getElementById('btnMic').classList.remove('recording');
+  document.getElementById('btnMic').title = 'Start live mic';
+  setMicState('off');
+}
+
+function toggleMic() {
+  if (!sessionActive) { toast('Start a session first.'); return; }
+  if (liveListening) {
+    stopLiveListening();
+    toast('Live mic paused. Click 🎙 to resume.');
+  } else {
+    startLiveListening();
+    toast('Live mic ON — just speak naturally!');
+  }
+}
+
+// Mic state drives the button appearance and status badge
+function setMicState(state) {
+  const btn = document.getElementById('btnMic');
+  const dot = document.getElementById('statusDot');
+  const txt = document.getElementById('statusText');
+  btn.classList.remove('recording');
+
+  switch (state) {
+    case 'listening':
+      btn.textContent = '🎙';
+      btn.classList.add('recording');
+      dot.className   = 'status-dot recording';
+      txt.textContent = 'Listening…';
+      break;
+    case 'processing':
+      btn.textContent = '⏳';
+      dot.className   = 'status-dot active';
+      txt.textContent = 'Processing…';
+      break;
+    case 'paused':
+      btn.textContent = '🎙';
+      dot.className   = 'status-dot active';
+      txt.textContent = 'Live';
+      break;
+    case 'off':
+      btn.textContent = '🎙';
+      dot.className   = 'status-dot';
+      txt.textContent = sessionActive ? 'Live' : 'Idle';
+      break;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   CHAT RENDERING
+═══════════════════════════════════════════════════════════ */
+function addAgentMsg(text, speak = true) {
+  const wrap = document.getElementById('chatMessages');
+  const now  = new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+
+  const row = document.createElement('div');
+  row.className = 'msg-row agent';
+  row.innerHTML = `
+    <div class="msg-avatar">M</div>
+    <div class="msg-bubble-wrap">
+      <span class="msg-sender">Max</span>
+      <div class="msg-bubble">${escHtml(text)}</div>
+      <span class="msg-time">${now}</span>
+    </div>`;
+  wrap.appendChild(row);
+  scrollBottom();
+
+  // Speak Max's message aloud via browser TTS
+  if (speak) speakText(text);
+}
+
+function addUserMsg(text) {
+  const wrap = document.getElementById('chatMessages');
+  const now  = new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+  const name = document.getElementById('infoName').textContent;
+  const label = (name && name !== '—') ? name : 'Crew';
+
+  const row = document.createElement('div');
+  row.className = 'msg-row user';
+  row.innerHTML = `
+    <div class="msg-avatar">${label[0].toUpperCase()}</div>
+    <div class="msg-bubble-wrap">
+      <span class="msg-sender">${escHtml(label)}</span>
+      <div class="msg-bubble">${escHtml(text)}</div>
+      <span class="msg-time">${now}</span>
+    </div>`;
+  wrap.appendChild(row);
+  scrollBottom();
+}
+
+function addSystemMsg(text) {
+  const wrap = document.getElementById('chatMessages');
+  const el = document.createElement('div');
+  el.className = 'msg-system';
+  el.textContent = text;
+  wrap.appendChild(el);
+  scrollBottom();
+}
+
+function showTyping(show) {
+  const ti = document.getElementById('typingIndicator');
+  ti.style.display = show ? 'flex' : 'none';
+  if (show) scrollBottom();
+}
+
+function scrollBottom() {
+  const wrap = document.getElementById('chatMessages');
+  // Double rAF: first frame lets DOM paint, second measures correct scrollHeight
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      wrap.scrollTop = wrap.scrollHeight;
+    });
+  });
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SIDEBAR UPDATES
+═══════════════════════════════════════════════════════════ */
+function setPriority(p) {
+  const chip = document.getElementById('priorityChip');
+  chip.className = 'priority-chip ' + (p ? p.toLowerCase() : 'p-none');
+  chip.textContent = p || '—';
+  if (p === 'P1') chip.classList.add('p1-flash');
+}
+
+function resetAttemptDots(n) {
+  document.querySelectorAll('.attempt-dot').forEach((d, i) => {
+    d.classList.toggle('used', i < n);
+  });
+}
+
+function updateSLABar() {
+  if (!currentPriority || !slaStartTime) return;
+  const elapsed  = (Date.now() - slaStartTime) / 1000;
+  const limit    = SLA_LIMITS[currentPriority] || 14400;
+  const pct      = Math.min((elapsed / limit) * 100, 100);
+  const fill     = document.getElementById('slaFill');
+  fill.style.width = pct + '%';
+  if (pct > 80) fill.style.background = 'var(--red)';
+  else if (pct > 50) fill.style.background = 'linear-gradient(90deg, var(--gold), var(--red))';
+  else fill.style.background = 'linear-gradient(90deg, var(--gold), var(--gold-dark))';
+  const rem = Math.max(limit - elapsed, 0);
+  document.getElementById('slaLabel').textContent = formatSecs(rem) + ' left';
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CALL LOG
+═══════════════════════════════════════════════════════════ */
+function renderCallLog() {
+  const list = document.getElementById('logList');
+  if (callLog.length === 0) {
+    list.innerHTML = '<div style="font-size:12px;color:var(--ink-soft);padding:10px;text-align:center;">No calls logged yet.</div>';
+    return;
+  }
+  list.innerHTML = callLog.slice(0, 12).map(c => `
+    <div class="log-entry">
+      <div class="log-top">
+        <span class="log-name">${escHtml(c.name)}</span>
+        <span class="log-time">${c.time}</span>
+      </div>
+      <div class="log-issue">Store ${escHtml(c.store)} • ${formatSecs(c.duration)}</div>
+      <div class="log-badges">
+        <span class="log-badge ${c.status === 'Resolved' ? 'badge-resolved' : 'badge-unresolved'}">${c.status}</span>
+        ${c.priority !== '—' ? `<span class="log-badge" style="background:var(--gold-pale);color:var(--ink-soft);">${c.priority}</span>` : ''}
+        ${c.attempts > 0 ? `<span class="log-badge badge-escalated">${c.attempts} fail${c.attempts>1?'s':''}</span>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TIMER
+═══════════════════════════════════════════════════════════ */
+function startTimer() {
+  timerSeconds = 0;
+  timerInterval = setInterval(() => {
+    if (!sessionActive) {
+      // Session ended — freeze timer display and stop interval
+      clearInterval(timerInterval);
+      return;
+    }
+    timerSeconds++;
+    document.getElementById('timerDisplay').textContent = formatSecs(timerSeconds);
+    updateSLABar();
+  }, 1000);
+}
+function stopTimer() {
+  clearInterval(timerInterval);
+  // Reset header timer display to 00:00 after a short delay
+  setTimeout(() => {
+    document.getElementById('timerDisplay').textContent = '00:00';
+  }, 1500);
+}
+function formatSecs(s) {
+  s = Math.floor(s);
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  if (h > 0) return `${h}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+  return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   STATUS
+═══════════════════════════════════════════════════════════ */
+function setStatus(state, label) {
+  const dot  = document.getElementById('statusDot');
+  const text = document.getElementById('statusText');
+  dot.className  = 'status-dot ' + state;
+  text.textContent = label;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════════════════ */
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>

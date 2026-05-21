@@ -79,7 +79,7 @@ class EscalationManager:
             )
         elif reason == "max_attempts_reached":
             return (
-                f"I have attempted to resolve this issue {self.escalation_reason} times without success. "
+                f"I have attempted to resolve this issue as per my knowledge. "
                 f"I am now escalating this to a human agent. Please stay available."
             )
         return "I am escalating this issue to a human agent who will assist you shortly."
