@@ -35,7 +35,7 @@ jobs:
         uses: huggingface/hub-sync@v0.1.0
         with:
           github_repo_id: ${{ github.repository }}
-          huggingface_repo_id: YOUR_HF_USERNAME/YOUR_SPACE_NAME # <--- ⚠️ REPLACE THIS WITH YOUR DETAILS
+          huggingface_repo_id: Adityaa13/agent-mcd # <--- ⚠️ REPLACE THIS WITH YOUR DETAILS
           hf_token: ${{ secrets.HF_TOKEN }}
           repo_type: space
           space_sdk: docker
