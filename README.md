@@ -1,3 +1,11 @@
+---
+title: Agent MCD
+emoji: 🍔
+colorFrom: red
+colorTo: yellow
+sdk: docker
+pinned: false
+---
 # McDonald's Crew Support Voice Agent
 
 An agentic AI voice assistant that handles internal IT and operations 
