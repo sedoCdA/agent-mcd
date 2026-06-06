@@ -12,11 +12,10 @@ from rag import retrieve_solution
 
 RESOLUTION_INDICATORS = [
     "issue is resolved", "closing the ticket", "glad it's working",
-    "great to hear", "happy to hear", "pleased to hear",
-    "back up", "working now", "resolved", "fixed", "glad to hear",
-    "have a good day", "resume normal", "anything else",
-    "you're welcome", "welcome, have", "without any issues",
-    "functioning as expected", "normal operations"
+    "great to hear that it", "happy to hear that it", "pleased to hear that it",
+    "back up and running", "glad we could resolve", "happy we could help",
+    "have a good day", "resume normal operations", "without any issues",
+    "functioning as expected", "normal operations have resumed"
 ]
 
 PRIORITY_ORDER = {"P1": 1, "P2": 2, "P3": 3, "P4": 4}
@@ -449,8 +448,13 @@ def run_voice_loop():
         if interrupted:
             speak("Go ahead, I am listening.")
 
-        # ── RESOLUTION CHECK ───────────────────────────────────────────────────
+        # ── RESOLUTION CHECK ───────────────────────────────────────────────
         if is_resolved_by_agent(response):
+            closing = (
+                f"Glad I could help, {caller_name}. "
+                "Thank you for calling McDonald's crew support. Have a great day!"
+            )
+            speak(closing)
             finalize_and_log(
                 caller_name, store_id, conversation_history,
                 escalation_manager, "Resolved", failed_attempts, start_time

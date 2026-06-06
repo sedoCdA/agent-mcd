@@ -38,11 +38,10 @@ from rag import retrieve_solution
 
 RESOLUTION_INDICATORS = [
     "issue is resolved", "closing the ticket", "glad it's working",
-    "great to hear", "happy to hear", "pleased to hear",
-    "back up", "working now", "resolved", "fixed", "glad to hear",
-    "have a good day", "resume normal", "anything else",
-    "you're welcome", "welcome, have", "without any issues",
-    "functioning as expected", "normal operations"
+    "great to hear that it", "happy to hear that it", "pleased to hear that it",
+    "back up and running", "glad we could resolve", "happy we could help",
+    "have a good day", "resume normal operations", "without any issues",
+    "functioning as expected", "normal operations have resumed"
 ]
 
 FAILURE_INDICATORS = [
@@ -470,6 +469,11 @@ def session_message(req: MessageRequest):
     # RESOLUTION CHECK
     resolved = False
     if is_resolved_by_agent(agent_response):
+        closing = (
+            f"Glad I could help, {caller_name}. "
+            "Thank you for calling McDonald's crew support. Have a great day!"
+        )
+        full_response = full_response.strip() + " " + closing
         _finalize(state, "Resolved")
         state["ended"] = True
         resolved = True
