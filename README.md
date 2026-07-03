@@ -7,7 +7,7 @@ sdk: docker
 pinned: false
 ---
 
-# 🍔 Agent MCD — McDonald's Crew Support Voice Agent
+# 🍔 Agent MCD - McDonald's Crew Support Voice Agent
 
 > An agentic AI voice assistant that handles real-time IT and operations support calls from McDonald's crew members. Replaces repetitive human support calls with a voice bot that listens, diagnoses, escalates, and logs — end to end.
 
